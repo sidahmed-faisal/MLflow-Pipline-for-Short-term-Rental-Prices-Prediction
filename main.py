@@ -23,16 +23,19 @@ def go(config: DictConfig):
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
 
+    # You can get the path at the root of the MLflow project with this:
+    root_path = hydra.utils.get_original_cwd()
+
     # Steps to execute
-    steps_par = config['main']['steps']
     active_steps = steps_par.split(",") if steps_par != "all" else _steps
+    steps_par = config['main']['steps']
 
     # Move to a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir:
 
         if "download" in active_steps:
-            # Download file and load in W&B
             _ = mlflow.run(
+            # Download file and load in W&B
                 f"{config['main']['components_repository']}/get_data",
                 "main",
                 version='main',
