@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--input_artifact", 
         type= str,
-        help= "Dataset artifact name you want to download"
+        help= "Dataset artifact name you want to download",
         required=True
     )
 

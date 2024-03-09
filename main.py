@@ -27,18 +27,17 @@ def go(config: DictConfig):
     root_path = hydra.utils.get_original_cwd()
 
     # Steps to execute
-    active_steps = steps_par.split(",") if steps_par != "all" else _steps
     steps_par = config['main']['steps']
+    active_steps = steps_par.split(",") if steps_par != "all" else _steps
 
     # Move to a temporary directory
     with tempfile.TemporaryDirectory() as tmp_dir:
 
         if "download" in active_steps:
             _ = mlflow.run(
-            # Download file and load in W&B
-                f"{config['main']['components_repository']}/get_data",
+                f"{config['main']['components_repository']}/get_data/",
                 "main",
-                version='main',
+                version="main",
                 parameters={
                     "sample": config["etl"]["sample"],
                     "artifact_name": "sample.csv",
@@ -46,6 +45,18 @@ def go(config: DictConfig):
                     "artifact_description": "Raw file as downloaded"
                 },
             )
-
+        if "basic_cleaning" in active_steps:
+            _ = mlflow.run(
+                os.path.join(root_path, "src", "basic_cleaning"),
+                "main",
+                parameters={
+                    "input_artifact": "sample.csv:latest",
+                    "output_artifact": "clean_sample.csv",
+                    "output_type": "clean_sample",
+                    "output_description": "Data with outliers and null values removed",
+                    "min_price": config['etl']['min_price'],
+                    "max_price": config['etl']['max_price']
+                },
+            )
 if __name__ == "__main__":
     go()
